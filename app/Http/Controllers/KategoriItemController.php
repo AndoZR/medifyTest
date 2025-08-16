@@ -6,52 +6,76 @@ use Illuminate\Http\Request;
 
 class KategoriItemController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = KategoriItem::query();
-        if ($request->kode) $query->where('kode', 'LIKE', '%' . $request->kode . '%');
-        if ($request->nama) $query->where('nama', 'LIKE', '%' . $request->nama . '%');
-        $kategori = $query->get();
-        return view('kategori_items.index', compact('kategori'));
+        return view('kategori_items.index.index');
     }
 
-    public function create()
+    public function search(Request $request)
     {
-        return view('kategori_items.create');
-    }
+        $kode = $request->kode;
+        $nama = $request->nama;
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'kode' => 'required|unique:kategori_items',
-            'nama' => 'required'
+        $data_search = KategoriItem::query();
+
+        if (!empty($kode)) {
+            $data_search = $data_search->where('kode', 'LIKE', '%' . $kode . '%');
+        }
+        if (!empty($nama)) {
+            $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
+        }
+
+        $data_search = $data_search->select('id', 'kode', 'nama')->orderBy('id')->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $data_search
         ]);
-        KategoriItem::create($request->only('kode', 'nama'));
-        return redirect()->route('kategori-items.index');
     }
 
-    public function show($id)
+    public function singleView($kode)
     {
-        $kategori = KategoriItem::with('masterItems')->findOrFail($id);
-        return view('kategori_items.show', compact('kategori'));
+        $data['data'] = KategoriItem::where('kode', $kode)->first();
+        return view('kategori_items.single.index', $data);
     }
 
-    public function edit($id)
+    public function formView($method, $id = 0)
     {
-        $kategori = KategoriItem::findOrFail($id);
-        return view('kategori_items.edit', compact('kategori'));
+        if ($method == 'new') {
+            $item = null;
+        } else {
+            $item = KategoriItem::find($id);
+        }
+        
+        $data['item'] = $item;
+        $data['method'] = $method;
+        
+        return view('kategori_items.form.index', $data);
     }
 
-    public function update(Request $request, $id)
+    public function formSubmit(Request $request, $method, $id = 0)
     {
-        $kategori = KategoriItem::findOrFail($id);
-        $kategori->update($request->only('kode', 'nama'));
-        return redirect()->route('kategori-items.index');
+        if ($method == 'new') {
+            $data_item = new KategoriItem;
+            $kode = KategoriItem::count('id');
+            $kode = $kode + 1;
+            $kode = str_pad($kode, 5, '0', STR_PAD_LEFT);
+            sleep(1);
+        } else {
+            $data_item = KategoriItem::find($id);
+            $kode = $data_item->kode;
+        }
+
+        $data_item->kode = $kode;
+        $data_item->nama = $request->nama;
+        $data_item->save();
+
+        return redirect('kategori-items');
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
-        KategoriItem::findOrFail($id)->delete();
-        return redirect()->route('kategori-items.index');
+        KategoriItem::find($id)->delete();
+        return redirect('kategori-items');
     }
 }

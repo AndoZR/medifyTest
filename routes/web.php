@@ -34,14 +34,27 @@ Route::get('/master-items/delete/{id}', [App\Http\Controllers\MasterItemsControl
 Route::get('/master-items/update-random-data', [App\Http\Controllers\MasterItemsController::class, 'updateRandomData']);
 
 // Daftar Kategori Item
-Route::get('kategori-items', [KategoriItemController::class, 'index'])->name('kategori-items.index');
-// Form Tambah Kategori Item
-Route::get('kategori-items/create', [KategoriItemController::class, 'create'])->name('kategori-items.create');
-// Simpan Kategori Item baru
-Route::post('kategori-items', [KategoriItemController::class, 'store'])->name('kategori-items.store');// Detail Kategori Item
-Route::get('kategori-items/{id}', [KategoriItemController::class, 'show'])->name('kategori-items.show');// Form Edit Kategori Item
-Route::get('kategori-items/{id}/edit', [KategoriItemController::class, 'edit'])->name('kategori-items.edit');
-// Update Kategori Item
-Route::put('kategori-items/{id}', [KategoriItemController::class, 'update'])->name('kategori-items.update');
+Route::get('kategori-items', [App\Http\Controllers\KategoriItemController::class, 'index'])
+    ->name('kategori-items.index');
+
+// Kategori Items search (untuk AJAX DataTables)
+Route::get('kategori-items/search', [App\Http\Controllers\KategoriItemController::class, 'search'])->name('kategori-items.search');
+
+Route::get('/kategori-items/view/{kode}', [App\Http\Controllers\KategoriItemController::class, 'singleView']);
+
+
+// Form Tambah/Edit Kategori Item
+Route::get('kategori-items/form/{method}/{id?}', [App\Http\Controllers\KategoriItemController::class, 'formView'])
+    ->name('kategori-items.form');
+
+// Submit Form Tambah/Edit
+Route::post('kategori-items/form/{method}/{id?}', [App\Http\Controllers\KategoriItemController::class, 'formSubmit'])
+    ->name('kategori-items.submit');
+
+// Detail Kategori Item
+Route::get('kategori-items/view/{id}', [App\Http\Controllers\KategoriItemController::class, 'singleView'])
+    ->name('kategori-items.view');
+
 // Hapus Kategori Item
-Route::delete('kategori-items/{id}', [KategoriItemController::class, 'destroy'])->name('kategori-items.destroy');
+Route::get('kategori-items/delete/{id}', [App\Http\Controllers\KategoriItemController::class, 'delete'])
+    ->name('kategori-items.delete');
