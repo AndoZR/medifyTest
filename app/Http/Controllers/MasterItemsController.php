@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Storage;
 use App\Models\MasterItem;
+use App\Models\KategoriItem;
 use Illuminate\Http\Request;
 
 class MasterItemsController extends Controller
@@ -21,12 +23,22 @@ class MasterItemsController extends Controller
 
         $data_search = MasterItem::query();
 
-        if (!empty($kode)) $data_search = $data_search->where('kode', $kode);
-        if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
-        if (!empty($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin)->where('harga_beli', '<=', $hargamax);
+        if (!empty($kode)) {
+            $data_search = $data_search->where('kode', $kode);
+        }
+        if (!empty($nama)) {
+            $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
+        }
+        // Perbaikan filter harga
+        if (!empty($hargamin) && !empty($hargamax)) {
+            $data_search = $data_search->whereBetween('harga_beli', [$hargamin, $hargamax]);
+        } elseif (!empty($hargamin)) {
+            $data_search = $data_search->where('harga_beli', '>=', $hargamin);
+        } elseif (!empty($hargamax)) {
+            $data_search = $data_search->where('harga_beli', '<=', $hargamax);
+        }
 
         $data_search = $data_search->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
-
 
         return json_encode([
             'status' => 200,
@@ -37,14 +49,21 @@ class MasterItemsController extends Controller
     public function formView($method, $id = 0)
     {
         if ($method == 'new') {
-            $item = [];
+            $item = null; // lebih baik null daripada array kosong
         } else {
             $item = MasterItem::find($id);
         }
+
+        // ambil semua kategori untuk dropdown
+        $kategori = KategoriItem::all();
+
         $data['item'] = $item;
         $data['method'] = $method;
+        $data['kategori'] = $kategori;
+
         return view('master_items.form.index', $data);
     }
+
 
     public function singleView($kode)
     {
@@ -71,6 +90,19 @@ class MasterItemsController extends Controller
         $data_item->kode = $kode;
         $data_item->supplier = $request->supplier;
         $data_item->jenis = $request->jenis;
+        $data_item->kategori_id = $request->kategori_id;
+
+        // Simpan foto jika ada
+        if ($request->hasFile('foto')) {
+            // hapus foto lama jika ada
+            if ($data_item->foto && Storage::disk('public')->exists($data_item->foto)) {
+                \Storage::disk('public')->delete($data_item->foto);
+            }
+            $path = $request->file('foto')->store('foto_barang', 'public');
+            $data_item->foto = $path;
+        }
+
+
         $data_item->save();
 
         return redirect('master-items');

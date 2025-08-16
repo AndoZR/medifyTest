@@ -19,8 +19,16 @@ return new class extends Migration
             $table->string('nama');
             $table->integer('harga_beli');
             $table->integer('laba');
+            $table->string('foto')->nullable();
             $table->string('supplier');
             $table->string('jenis');
+
+            // relasi ke kategori
+            $table->unsignedBigInteger('kategori_id');
+            $table->foreign('kategori_id')
+                ->references('id')->on('kategori_items')
+                ->onDelete('cascade'); 
+
             $table->timestamps();
             $table->softDeletes();
         });

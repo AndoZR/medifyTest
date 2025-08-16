@@ -10,4 +10,11 @@ class MasterItem extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
+    protected $table = 'master_items';
+
+    public function kategoriItems()
+    {
+        return $this->belongsToMany(KategoriItem::class, 'kategori_master_item', 'master_item_id', 'kategori_item_id');
+    }
 }
