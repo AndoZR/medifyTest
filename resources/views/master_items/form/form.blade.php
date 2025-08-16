@@ -12,16 +12,16 @@
         <input type="text" class="form-control" name="nama" required  value="{{$item->nama ?? ''}}">
     </div>
 
-    <label for="kategori_id">Kategori</label>
-    <select name="kategori_id" id="kategori_id" class="form-control" required>
-        <option value="">-- Pilih Kategori --</option>
+    <label for="kategori_id">Kategori (*Pilih dengan menekan ctrl+klik untuk multi data)</label>
+    <select name="kategori_id[]" id="kategori_id" class="form-control" multiple required>
         @foreach($kategori as $k)
             <option value="{{ $k->id }}" 
-                {{ (isset($item) && $item->kategori_id == $k->id) ? 'selected' : '' }}>
+                {{ (isset($item) && $item->kategoriItems->contains($k->id)) ? 'selected' : '' }}>
                 {{ $k->nama }}
             </option>
         @endforeach
     </select>
+
 
     <div class="form-group">
         <label>Harga Beli</label>

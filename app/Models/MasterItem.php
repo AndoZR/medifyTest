@@ -15,6 +15,12 @@ class MasterItem extends Model
 
     public function kategoriItems()
     {
-        return $this->belongsToMany(KategoriItem::class, 'kategori_master_item', 'master_item_id', 'kategori_item_id');
+        return $this->belongsToMany(
+            KategoriItem::class,
+            'kategori_master_item',
+            'master_item_id',      // FK ke master_items
+            'kategori_item_id'     // FK ke kategori_items
+        );
     }
+
 }

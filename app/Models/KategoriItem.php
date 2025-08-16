@@ -13,19 +13,14 @@ class KategoriItem extends Model
 
     protected $fillable = ['kode', 'nama'];
 
-    protected static function booted()
-    {
-        static::created(function ($kategori) {
-            // update kode dengan id kalau belum ada
-            if (!$kategori->kode) {
-                $kategori->kode = $kategori->id;
-                $kategori->save();
-            }
-        });
-    }
-
     public function masterItems()
     {
-        return $this->belongsToMany(MasterItem::class, 'kategori_master_item', 'kategori_item_id', 'master_item_id');
+        return $this->belongsToMany(
+            MasterItem::class,
+            'kategori_master_item',
+            'kategori_item_id',    // FK ke kategori_items
+            'master_item_id'       // FK ke master_items
+        );
+
     }
 }

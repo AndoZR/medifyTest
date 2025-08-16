@@ -23,12 +23,6 @@ return new class extends Migration
             $table->string('supplier');
             $table->string('jenis');
 
-            // relasi ke kategori
-            $table->unsignedBigInteger('kategori_id');
-            $table->foreign('kategori_id')
-                ->references('id')->on('kategori_items')
-                ->onDelete('cascade'); 
-
             $table->timestamps();
             $table->softDeletes();
         });

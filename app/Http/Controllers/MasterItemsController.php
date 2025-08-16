@@ -67,20 +67,23 @@ class MasterItemsController extends Controller
 
     public function singleView($kode)
     {
-        $data['data'] = MasterItem::where('kode', $kode)->first();
+        $data['data'] = MasterItem::with('kategoriItems')
+                            ->where('kode', $kode)
+                            ->first();
+
         return view('master_items.single.index', $data);
+
     }
 
     public function formSubmit(Request $request, $method, $id = 0)
     {
         if ($method == 'new') {
             $data_item = new MasterItem;
-            $kode = MasterItem::count('id');
-            $kode = $kode + 1;
+            $kode = MasterItem::count('id') + 1;
             $kode = str_pad($kode, 5, '0', STR_PAD_LEFT);
-            sleep(3);
+            sleep(1);
         } else {
-            $data_item = MasterItem::find($id);
+            $data_item = MasterItem::findOrFail($id);
             $kode = $data_item->kode;
         }
 
@@ -90,11 +93,9 @@ class MasterItemsController extends Controller
         $data_item->kode = $kode;
         $data_item->supplier = $request->supplier;
         $data_item->jenis = $request->jenis;
-        $data_item->kategori_id = $request->kategori_id;
 
         // Simpan foto jika ada
         if ($request->hasFile('foto')) {
-            // hapus foto lama jika ada
             if ($data_item->foto && Storage::disk('public')->exists($data_item->foto)) {
                 \Storage::disk('public')->delete($data_item->foto);
             }
@@ -102,11 +103,17 @@ class MasterItemsController extends Controller
             $data_item->foto = $path;
         }
 
-
+        // simpan dulu supaya dapat ID
         $data_item->save();
+
+        // simpan relasi kategori (many-to-many)
+        if ($request->has('kategori_id')) {
+            $data_item->kategoriItems()->sync($request->kategori_id);
+        }
 
         return redirect('master-items');
     }
+
 
     public function delete($id)
     {

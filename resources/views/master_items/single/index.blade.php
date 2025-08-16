@@ -42,6 +42,21 @@
                             <td>:</td>
                             <td>{{$data->jenis}}</td>
                         </tr>
+                        <tr>
+                            <th>Kategori</th>
+                            <td>:</td>
+                            <td>
+                                @if($data->kategoriItems->isNotEmpty())
+                                    <ul>
+                                        @foreach($data->kategoriItems as $kategori)
+                                            <li>{{ $kategori->nama }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <i>Tidak ada kategori</i>
+                                @endif
+                            </td>
+                        </tr>
                     </table>
                     <a class="btn btn-info" href="{{url('master-items/form/edit')}}/{{$data->id}}">Edit</a>
                     <a class="btn btn-danger" href="{{url('master-items/delete')}}/{{$data->id}}" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
